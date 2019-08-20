@@ -1,0 +1,20 @@
+<package>
+  <description brief="oroGen integration of AceINNA's OpenIMU driver">
+  
+  </description>
+  <author>Sylvain Joyeux/sylvain.joyeux@tidewise.io</author>
+  <license></license>
+  <url>http://</url>
+  <logo>http://</logo>
+  <depend package="base/cmake" />
+  <!--
+   To add any dependencies use the depend tag
+  <depend package="dummy-dependency-0" />
+	...
+  <depend package="dummy-dependency-n-1" />
+  <depend package="dummy-dependency-n" />
+  -->
+  <depend package="base/orogen/types" />
+  <depend package="base/orogen/iodrivers_base" />
+  <depend package="drivers/imu_aceinna_openimu" />
+</package>
