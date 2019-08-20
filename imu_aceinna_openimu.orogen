@@ -3,6 +3,7 @@ name "imu_aceinna_openimu"
 import_types_from "std"
 import_types_from "base"
 import_types_from "iodrivers_base"
+using_task_library "iodrivers_base"
 
 task_context "Task", subclasses: 'iodrivers_base::Task' do
     needs_configuration
