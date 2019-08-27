@@ -4,6 +4,7 @@
 #define IMU_ACEINNA_OPENIMU_TASK_TASK_HPP
 
 #include "imu_aceinna_openimu/TaskBase.hpp"
+#include <gps_base/UTMConverter.hpp>
 
 namespace imu_aceinna_openimu{
 
@@ -11,7 +12,7 @@ namespace imu_aceinna_openimu{
      * \brief The task context provides and requires services. It uses an ExecutionEngine to perform its functions.
      * Essential interfaces are operations, data flow ports and properties. These interfaces have been defined using the oroGen specification.
      * In order to modify the interfaces you should (re)use oroGen and rely on the associated workflow.
-     * 
+     *
      * \details
      * The name of a TaskContext is primarily defined via:
      \verbatim
@@ -25,8 +26,7 @@ namespace imu_aceinna_openimu{
     {
 	friend class TaskBase;
     protected:
-
-
+        gps_base::UTMConverter mUTMConverter;
 
     public:
         /** TaskContext constructor for Task
@@ -37,7 +37,7 @@ namespace imu_aceinna_openimu{
 
         /** Default deconstructor of Task
          */
-	~Task();
+        ~Task();
 
         /** This hook is called by Orocos when the state machine transitions
          * from PreOperational to Stopped. If it returns false, then the
@@ -77,6 +77,8 @@ namespace imu_aceinna_openimu{
          * it again. Finally, FatalError cannot be recovered.
          */
         void updateHook();
+
+        void processIO();
 
         /** This hook is called by Orocos when the component is in the
          * RunTimeError state, at each activity step. See the discussion in
