@@ -40,8 +40,23 @@ bool Task::configureHook()
     driver->validateDevice();
 
     Periods periods = _periods.get();
-    driver->writePeriodicPacketConfiguration(
+    driver->writeExtendedPeriodMessageConfiguration(
         "e3", periods.pose_and_acceleration);
+    driver->writeExtendedPeriodMessageConfiguration(
+        "i1", periods.status);
+
+    TaskConfiguration conf = _configuration.get();
+    driver->writeAccelerationLowPassFilter(
+        conf.acceleration_low_pass_filter
+    );
+    driver->writeAngularVelocityLowPassFilter(
+        conf.angular_velocity_low_pass_filter
+    );
+    driver->writeUsedSensors(
+        conf.use_magnetometers, conf.use_gps, conf.use_gps_course_as_heading);
+    driver->writeGPSProtocol(conf.gps_protocol);
+    driver->writeGPSBaudrate(conf.gps_baudrate);
+
     delete mTimestampEstimator;
     mTimestampEstimator = new aggregator::TimestampEstimator(
         base::Time::fromSeconds(10),
@@ -58,12 +73,15 @@ bool Task::startHook()
     mIMUHasGPSTime = false;
     mTimestampEstimator->reset();
     mLastTimestampEstimatorStatus = base::Time::now();
+    Driver* driver = static_cast<Driver*>(mDriver);
+    driver->writePeriodicPacketConfiguration("EP", _periods.get().main_rate);
     return true;
 }
 void Task::updateHook()
 {
     TaskBase::updateHook();
 }
+
 static base::Time ONE_WEEK = base::Time::fromMilliseconds(604800000);
 
 base::Time Task::timeSync(bool imuHasGPSTime, base::Time local_time, base::Time sample_time) {
@@ -98,7 +116,9 @@ base::Time Task::timeSync(bool imuHasGPSTime, base::Time local_time, base::Time 
 void Task::processIO()
 {
     Driver* driver = static_cast<Driver*>(mDriver);
-    if (driver->processOne() == Driver::UPDATED_STATE) {
+
+    auto update = driver->processOne();
+    if (update.isUpdated(Driver::UPDATED_STATE)) {
         auto local_time = base::Time::now();
 
         auto state = driver->getState();
@@ -109,6 +129,14 @@ void Task::processIO()
         _pose_samples.write(state.rbs);
         state.rba.time = time;
         _acceleration_samples.write(state.rba);
+    }
+
+    if (update.isUpdated(Driver::UPDATED_STATUS)) {
+        TaskStatus status;
+        status.imu_status = driver->readStatus();
+        status.filter_state = driver->getState().filter_state;
+        status.time = base::Time::now();
+        _status_samples.write(status);
     }
 
     bool need_timestamp_estimator_status =
@@ -124,6 +152,8 @@ void Task::errorHook()
 }
 void Task::stopHook()
 {
+    Driver* driver = static_cast<Driver*>(mDriver);
+    driver->writePeriodicPacketConfiguration("EP", 0);
     TaskBase::stopHook();
 }
 void Task::cleanupHook()
