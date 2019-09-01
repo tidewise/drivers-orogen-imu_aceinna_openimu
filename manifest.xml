@@ -8,4 +8,5 @@
   <depend package="drivers/orogen/iodrivers_base" />
   <depend package="drivers/orogen/gps_base" />
   <depend package="drivers/imu_aceinna_openimu" />
+  <depend package="drivers/orogen/aggregator" />
 </package>
