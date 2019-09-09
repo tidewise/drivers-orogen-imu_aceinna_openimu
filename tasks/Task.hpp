@@ -6,6 +6,10 @@
 #include "imu_aceinna_openimu/TaskBase.hpp"
 #include <gps_base/UTMConverter.hpp>
 
+namespace aggregator{
+    class TimestampEstimator;
+}
+
 namespace imu_aceinna_openimu{
 
     /*! \class Task
@@ -27,6 +31,13 @@ namespace imu_aceinna_openimu{
 	friend class TaskBase;
     protected:
         gps_base::UTMConverter mUTMConverter;
+        bool mIMUHasGPSTime = false;
+        base::Time mLastTimestampEstimatorStatus;
+        aggregator::TimestampEstimatorStatus mTimestampEstimatorStatus;
+
+        base::Time timeSync(
+            bool imuHasGPSTime, base::Time local_time, base::Time sample_time);
+        aggregator::TimestampEstimator* mTimestampEstimator = nullptr;
 
     public:
         /** TaskContext constructor for Task
