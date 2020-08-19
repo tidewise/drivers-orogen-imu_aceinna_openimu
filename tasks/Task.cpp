@@ -39,12 +39,6 @@ bool Task::configureHook()
 
     driver->validateDevice();
 
-    Periods periods = _periods.get();
-    driver->writeExtendedPeriodMessageConfiguration(
-        "e3", periods.pose_and_acceleration);
-    driver->writeExtendedPeriodMessageConfiguration(
-        "i1", periods.status);
-
     TaskConfiguration conf = _configuration.get();
     driver->writeAccelerationLowPassFilter(
         conf.acceleration_low_pass_filter
@@ -52,15 +46,13 @@ bool Task::configureHook()
     driver->writeAngularVelocityLowPassFilter(
         conf.angular_velocity_low_pass_filter
     );
-    driver->writeUsedSensors(
-        conf.use_magnetometers, conf.use_gps, conf.use_gps_course_as_heading);
     driver->writeGPSProtocol(conf.gps_protocol);
     driver->writeGPSBaudrate(conf.gps_baudrate);
 
     delete mTimestampEstimator;
     mTimestampEstimator = new aggregator::TimestampEstimator(
         base::Time::fromSeconds(10),
-        base::Time::fromSeconds(1.0 / periods.pose_and_acceleration));
+        base::Time::fromSeconds(1.0 / _message_rate.get()));
 
     guard.commit();
     return true;
@@ -74,7 +66,7 @@ bool Task::startHook()
     mTimestampEstimator->reset();
     mLastTimestampEstimatorStatus = base::Time::now();
     Driver* driver = static_cast<Driver*>(mDriver);
-    driver->writePeriodicPacketConfiguration("EP", _periods.get().main_rate);
+    driver->writePeriodicPacketConfiguration("e2", _message_rate.get());
     return true;
 }
 void Task::updateHook()
@@ -133,7 +125,6 @@ void Task::processIO()
 
     if (update.isUpdated(Driver::UPDATED_STATUS)) {
         TaskStatus status;
-        status.imu_status = driver->readStatus();
         status.filter_state = driver->getState().filter_state;
         status.time = base::Time::now();
         _status_samples.write(status);
@@ -153,7 +144,7 @@ void Task::errorHook()
 void Task::stopHook()
 {
     Driver* driver = static_cast<Driver*>(mDriver);
-    driver->writePeriodicPacketConfiguration("EP", 0);
+    driver->writePeriodicPacketConfiguration("e2", 0);
     TaskBase::stopHook();
 }
 void Task::cleanupHook()

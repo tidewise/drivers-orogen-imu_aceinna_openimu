@@ -1,34 +1,40 @@
 # frozen_string_literal: true
 
-name 'imu_aceinna_openimu'
+name "imu_aceinna_openimu"
 
-import_types_from 'std'
-import_types_from 'base'
-import_types_from 'iodrivers_base'
-import_types_from 'gps_base'
-using_task_library 'iodrivers_base'
+import_types_from "std"
+import_types_from "base"
+import_types_from "iodrivers_base"
+import_types_from "gps_base"
+using_task_library "iodrivers_base"
 
-using_library 'imu_aceinna_openimu'
-import_types_from 'aggregator'
-import_types_from 'imu_aceinna_openimuTypes.hpp'
-import_types_from 'imu_aceinna_openimu/Configuration.hpp'
-import_types_from 'imu_aceinna_openimu/Status.hpp'
-import_types_from 'imu_aceinna_openimu/FilterState.hpp'
+using_library "imu_aceinna_openimu"
+import_types_from "aggregator"
+import_types_from "imu_aceinna_openimuTypes.hpp"
+import_types_from "imu_aceinna_openimu/Configuration.hpp"
+import_types_from "imu_aceinna_openimu/Status.hpp"
+import_types_from "imu_aceinna_openimu/FilterState.hpp"
 
-task_context 'Task', subclasses: 'iodrivers_base::Task' do
+task_context "Task", subclasses: "iodrivers_base::Task" do
     needs_configuration
 
-    property 'local_time_synchronized_with_gps', 'bool', false
-    property 'timestamp_estimator_status_period', 'base/Time'
-    property 'configuration', 'imu_aceinna_openimu/TaskConfiguration'
-    property 'periods', 'imu_aceinna_openimu/Periods'
-    property 'utm_parameters', 'gps_base/UTMConversionParameters'
+    property "local_time_synchronized_with_gps", "bool", false
+    property "timestamp_estimator_status_period", "base/Time"
+    property "configuration", "imu_aceinna_openimu/TaskConfiguration"
 
-    output_port 'pose_samples', 'base/samples/RigidBodyState'
-    output_port 'acceleration_samples', 'base/samples/RigidBodyAcceleration'
-    output_port 'imu_sensors_samples', 'base/samples/IMUSensors'
-    output_port 'status_samples', 'imu_aceinna_openimu/TaskStatus'
-    output_port 'timestamp_estimator_status', 'aggregator/TimestampEstimatorStatus'
+    # Message rate (in Hz)
+    #
+    # Allowed values are 200, 100, 50, 25, 20, 10, 5, 2 and 1.
+    property "message_rate", "int"
+
+    # UTM parameters for conversion from lat/lon/alt to local cartesian
+    property "utm_parameters", "gps_base/UTMConversionParameters"
+
+    output_port "pose_samples", "base/samples/RigidBodyState"
+    output_port "acceleration_samples", "base/samples/RigidBodyAcceleration"
+    output_port "imu_sensors_samples", "base/samples/IMUSensors"
+    output_port "status_samples", "imu_aceinna_openimu/TaskStatus"
+    output_port "timestamp_estimator_status", "aggregator/TimestampEstimatorStatus"
 
     fd_driven
 end
