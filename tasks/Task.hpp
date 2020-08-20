@@ -30,6 +30,8 @@ namespace imu_aceinna_openimu{
     {
 	friend class TaskBase;
     protected:
+        base::Matrix3d tf;
+
         gps_base::UTMConverter mUTMConverter;
         bool mIMUHasGPSTime = false;
         base::Time mLastTimestampEstimatorStatus;

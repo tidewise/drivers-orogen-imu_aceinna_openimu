@@ -24,6 +24,8 @@ Task::~Task()
 
 bool Task::configureHook()
 {
+    tf = base::AngleAxisd(M_PI, base::Vector3d::UnitX());
+
     mUTMConverter.setParameters(_utm_parameters.get());
 
     iodrivers_base::ConfigureGuard guard(this);
@@ -118,6 +120,12 @@ void Task::processIO()
         auto time = timeSync(state.filter_state.mode == OPMODE_INS,
                              local_time, state.rbs.time);
         state.rbs.time = time;
+        state.rbs.orientation = tf * state.rbs.orientation;
+        state.rbs.cov_orientation = tf * state.rbs.cov_orientation * tf.inverse();
+        state.rbs.angular_velocity = tf * state.rbs.angular_velocity;
+        state.rbs.cov_angular_velocity =
+            tf * state.rbs.cov_angular_velocity * tf.inverse();
+
         _pose_samples.write(state.rbs);
         state.rba.time = time;
         _acceleration_samples.write(state.rba);
