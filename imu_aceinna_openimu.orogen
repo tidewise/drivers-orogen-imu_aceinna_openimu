@@ -12,8 +12,9 @@ using_library "imu_aceinna_openimu"
 import_types_from "aggregator"
 import_types_from "imu_aceinna_openimuTypes.hpp"
 import_types_from "imu_aceinna_openimu/Configuration.hpp"
-import_types_from "imu_aceinna_openimu/Status.hpp"
 import_types_from "imu_aceinna_openimu/FilterState.hpp"
+import_types_from "imu_aceinna_openimu/MagneticInfo.hpp"
+import_types_from "imu_aceinna_openimu/Status.hpp"
 
 task_context "Task", subclasses: "iodrivers_base::Task" do
     needs_configuration
@@ -25,7 +26,7 @@ task_context "Task", subclasses: "iodrivers_base::Task" do
     # Message rate (in Hz)
     #
     # Allowed values are 200, 100, 50, 25, 20, 10, 5, 2 and 1.
-    property "message_rate", "int"
+    property "message_rate", "int", 20
 
     # UTM parameters for conversion from lat/lon/alt to local cartesian
     property "utm_parameters", "gps_base/UTMConversionParameters"
@@ -33,6 +34,7 @@ task_context "Task", subclasses: "iodrivers_base::Task" do
     output_port "pose_samples", "base/samples/RigidBodyState"
     output_port "acceleration_samples", "base/samples/RigidBodyAcceleration"
     output_port "imu_sensors_samples", "base/samples/IMUSensors"
+    output_port "magnetic_info", "imu_aceinna_openimu/MagneticInfo"
     output_port "status_samples", "imu_aceinna_openimu/TaskStatus"
     output_port "timestamp_estimator_status", "aggregator/TimestampEstimatorStatus"
 
