@@ -9,6 +9,8 @@ namespace imu_aceinna_openimu {
     /** Main configuration structure
      */
     struct TaskConfiguration {
+        std::string period_message = "e2";
+
         int16_t acceleration_low_pass_filter = 25;
         int16_t angular_velocity_low_pass_filter = 25;
 

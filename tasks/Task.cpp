@@ -66,7 +66,10 @@ bool Task::startHook()
     mTimestampEstimator->reset();
     mLastTimestampEstimatorStatus = base::Time::now();
     Driver* driver = static_cast<Driver*>(mDriver);
-    driver->writePeriodicPacketConfiguration("e2", _message_rate.get());
+    driver->writePeriodicPacketConfiguration(
+        _configuration.get().period_message,
+        _message_rate.get()
+    );
     return true;
 }
 void Task::updateHook()
@@ -109,25 +112,26 @@ void Task::processIO()
 {
     Driver* driver = static_cast<Driver*>(mDriver);
 
-    auto update = driver->processOne();
-    if (update.isUpdated(Driver::UPDATED_STATE)) {
+    if (driver->processOne()) {
         auto local_time = base::Time::now();
 
-        auto state = driver->getState();
-        state.computeNWUPosition(mUTMConverter);
-        auto time = timeSync(state.filter_state.mode == OPMODE_INS,
-                             local_time, state.rbs.time);
-        state.rbs.time = time;
-        _pose_samples.write(state.rbs);
-        state.rba.time = time;
-        _acceleration_samples.write(state.rba);
-    }
+        auto update = driver->getLastPeriodicUpdate();
+        update.computeNWUPosition(mUTMConverter);
+        auto time = timeSync(update.filter_state.mode == OPMODE_INS,
+                             local_time, update.rbs.time);
+        update.rbs.time = time;
 
-    if (update.isUpdated(Driver::UPDATED_STATUS)) {
-        TaskStatus status;
-        status.filter_state = driver->getState().filter_state;
-        status.time = base::Time::now();
-        _status_samples.write(status);
+        _pose_samples.write(update.rbs);
+
+        if (!update.rba.time.isNull()) {
+            update.rba.time = time;
+            _acceleration_samples.write(update.rba);
+        }
+
+        if (!update.magnetic_info.time.isNull()) {
+            update.magnetic_info.time = time;
+            _magnetic_info.write(update.magnetic_info);
+        }
     }
 
     bool need_timestamp_estimator_status =
