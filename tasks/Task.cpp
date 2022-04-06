@@ -148,7 +148,10 @@ void Task::errorHook()
 void Task::stopHook()
 {
     Driver* driver = static_cast<Driver*>(mDriver);
-    driver->writePeriodicPacketConfiguration("e2", 0);
+    driver->writePeriodicPacketConfiguration(
+        _configuration.get().period_message, 0
+    );
+
     TaskBase::stopHook();
 }
 void Task::cleanupHook()
