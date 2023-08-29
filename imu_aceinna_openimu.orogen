@@ -31,6 +31,15 @@ task_context "Task", subclasses: "iodrivers_base::Task" do
     # UTM parameters for conversion from lat/lon/alt to local cartesian
     property "utm_parameters", "gps_base/UTMConversionParameters"
 
+    # The size (in samples) of the box filter we run over the angular velocity samples
+    #
+    # Some OpenIMU firmwares actually were not doing a low-pass filter on the
+    # gyros. This leads to a rather noisy angular velocity output, with a high
+    # frequency noise that this filter removes
+    #
+    # The default is to not filter at all
+    property "angular_velocity_filter_size", "int", 1
+
     output_port "pose_samples", "base/samples/RigidBodyState"
     output_port "acceleration_samples", "base/samples/RigidBodyAcceleration"
     output_port "imu_sensors_samples", "base/samples/IMUSensors"

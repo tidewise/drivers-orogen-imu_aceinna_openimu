@@ -61,6 +61,8 @@ bool Task::startHook()
     Driver* driver = static_cast<Driver*>(mDriver);
     driver->writePeriodicPacketConfiguration(_configuration.get().period_message,
         _message_rate.get());
+
+    m_angular_velocity_filter_buffer.clear();
     return true;
 }
 void Task::updateHook()
@@ -113,9 +115,12 @@ void Task::processIO()
         update.computeNWUPosition(mUTMConverter);
         auto time =
             timeSync(update.filter_state.mode == OPMODE_INS, local_time, update.rbs.time);
-        update.rbs.time = time;
 
-        _pose_samples.write(update.rbs);
+        auto filtered_rbs = update.rbs;
+        filtered_rbs.time = time;
+        filtered_rbs.angular_velocity =
+            filterAngularVelocity(update.rbs.angular_velocity);
+        _pose_samples.write(filtered_rbs);
 
         if (!update.rba.time.isNull()) {
             update.rba.time = time;
@@ -134,6 +139,31 @@ void Task::processIO()
     if (need_timestamp_estimator_status) {
         _timestamp_estimator_status.write(mTimestampEstimatorStatus);
     }
+}
+Eigen::Vector3d Task::filterAngularVelocity(Eigen::Vector3d const& angular_velocity)
+{
+    int filter_size = _angular_velocity_filter_size.get();
+    if (filter_size <= 1) {
+        return angular_velocity;
+    }
+
+    if (m_angular_velocity_filter_buffer.empty()) {
+        // Need to initialize. Use the first sample to fill the buffer the first time
+        m_angular_velocity_filter_buffer.resize(filter_size, angular_velocity);
+    }
+
+    ++m_angular_velocity_filter_position;
+    if (m_angular_velocity_filter_position >= filter_size) {
+        m_angular_velocity_filter_position = 0;
+    }
+    m_angular_velocity_filter_buffer[m_angular_velocity_filter_position] =
+        angular_velocity;
+
+    Eigen::Vector3d sum = Eigen::Vector3d::Zero();
+    for (auto const v : m_angular_velocity_filter_buffer) {
+        sum += v;
+    }
+    return sum / filter_size;
 }
 void Task::errorHook()
 {
