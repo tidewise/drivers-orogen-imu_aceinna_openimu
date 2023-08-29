@@ -6,16 +6,19 @@
 #include "imu_aceinna_openimu/TaskBase.hpp"
 #include <gps_base/UTMConverter.hpp>
 
-namespace aggregator{
+namespace aggregator {
     class TimestampEstimator;
 }
 
-namespace imu_aceinna_openimu{
+namespace imu_aceinna_openimu {
 
     /*! \class Task
-     * \brief The task context provides and requires services. It uses an ExecutionEngine to perform its functions.
-     * Essential interfaces are operations, data flow ports and properties. These interfaces have been defined using the oroGen specification.
-     * In order to modify the interfaces you should (re)use oroGen and rely on the associated workflow.
+     * \brief The task context provides and requires services. It uses an ExecutionEngine
+     to perform its functions.
+     * Essential interfaces are operations, data flow ports and properties. These
+     interfaces have been defined using the oroGen specification.
+     * In order to modify the interfaces you should (re)use oroGen and rely on the
+     associated workflow.
      *
      * \details
      * The name of a TaskContext is primarily defined via:
@@ -24,25 +27,28 @@ namespace imu_aceinna_openimu{
          task('custom_task_name','imu_aceinna_openimu::Task')
      end
      \endverbatim
-     *  It can be dynamically adapted when the deployment is called with a prefix argument.
+     *  It can be dynamically adapted when the deployment is called with a prefix
+     argument.
      */
-    class Task : public TaskBase
-    {
-	friend class TaskBase;
+    class Task : public TaskBase {
+        friend class TaskBase;
+
     protected:
         gps_base::UTMConverter mUTMConverter;
         bool mIMUHasGPSTime = false;
         base::Time mLastTimestampEstimatorStatus;
         aggregator::TimestampEstimatorStatus mTimestampEstimatorStatus;
 
-        base::Time timeSync(
-            bool imuHasGPSTime, base::Time local_time, base::Time sample_time);
+        base::Time timeSync(bool imuHasGPSTime,
+            base::Time local_time,
+            base::Time sample_time);
         aggregator::TimestampEstimator* mTimestampEstimator = nullptr;
 
     public:
         /** TaskContext constructor for Task
-         * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
-         * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
+         * \param name Name of the task. This name needs to be unique to make it
+         * identifiable via nameservices. \param initial_state The initial TaskState of
+         * the TaskContext. Default is Stopped state.
          */
         Task(std::string const& name = "imu_aceinna_openimu::Task");
 
@@ -113,4 +119,3 @@ namespace imu_aceinna_openimu{
 }
 
 #endif
-

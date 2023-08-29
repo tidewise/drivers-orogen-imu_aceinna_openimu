@@ -1,9 +1,9 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.cpp */
 
 #include "Task.hpp"
+#include <aggregator/TimestampEstimator.hpp>
 #include <imu_aceinna_openimu/Driver.hpp>
 #include <iodrivers_base/ConfigureGuard.hpp>
-#include <aggregator/TimestampEstimator.hpp>
 
 using namespace imu_aceinna_openimu;
 
@@ -15,8 +15,6 @@ Task::Task(std::string const& name)
 Task::~Task()
 {
 }
-
-
 
 /// The following lines are template definitions for the various state machine
 // hooks defined by Orocos::RTT. See Task.hpp for more detailed
@@ -34,24 +32,19 @@ bool Task::configureHook()
 
     // This is MANDATORY and MUST be called after the setDriver but before you do
     // anything with the driver
-    if (! TaskBase::configureHook())
+    if (!TaskBase::configureHook())
         return false;
 
     driver->validateDevice();
 
     TaskConfiguration conf = _configuration.get();
-    driver->writeAccelerationLowPassFilter(
-        conf.acceleration_low_pass_filter
-    );
-    driver->writeAngularVelocityLowPassFilter(
-        conf.angular_velocity_low_pass_filter
-    );
+    driver->writeAccelerationLowPassFilter(conf.acceleration_low_pass_filter);
+    driver->writeAngularVelocityLowPassFilter(conf.angular_velocity_low_pass_filter);
     driver->writeGPSProtocol(conf.gps_protocol);
     driver->writeGPSBaudrate(conf.gps_baudrate);
 
     delete mTimestampEstimator;
-    mTimestampEstimator = new aggregator::TimestampEstimator(
-        base::Time::fromSeconds(10),
+    mTimestampEstimator = new aggregator::TimestampEstimator(base::Time::fromSeconds(10),
         base::Time::fromSeconds(1.0 / _message_rate.get()));
 
     guard.commit();
@@ -59,17 +52,15 @@ bool Task::configureHook()
 }
 bool Task::startHook()
 {
-    if (! TaskBase::startHook())
+    if (!TaskBase::startHook())
         return false;
 
     mIMUHasGPSTime = false;
     mTimestampEstimator->reset();
     mLastTimestampEstimatorStatus = base::Time::now();
     Driver* driver = static_cast<Driver*>(mDriver);
-    driver->writePeriodicPacketConfiguration(
-        _configuration.get().period_message,
-        _message_rate.get()
-    );
+    driver->writePeriodicPacketConfiguration(_configuration.get().period_message,
+        _message_rate.get());
     return true;
 }
 void Task::updateHook()
@@ -79,7 +70,10 @@ void Task::updateHook()
 
 static base::Time ONE_WEEK = base::Time::fromMilliseconds(604800000);
 
-base::Time Task::timeSync(bool imuHasGPSTime, base::Time local_time, base::Time sample_time) {
+base::Time Task::timeSync(bool imuHasGPSTime,
+    base::Time local_time,
+    base::Time sample_time)
+{
     bool gpsTimeSwitch = imuHasGPSTime ^ mIMUHasGPSTime;
     mIMUHasGPSTime = imuHasGPSTime;
 
@@ -117,8 +111,8 @@ void Task::processIO()
 
         auto update = driver->getLastPeriodicUpdate();
         update.computeNWUPosition(mUTMConverter);
-        auto time = timeSync(update.filter_state.mode == OPMODE_INS,
-                             local_time, update.rbs.time);
+        auto time =
+            timeSync(update.filter_state.mode == OPMODE_INS, local_time, update.rbs.time);
         update.rbs.time = time;
 
         _pose_samples.write(update.rbs);
@@ -148,9 +142,7 @@ void Task::errorHook()
 void Task::stopHook()
 {
     Driver* driver = static_cast<Driver*>(mDriver);
-    driver->writePeriodicPacketConfiguration(
-        _configuration.get().period_message, 0
-    );
+    driver->writePeriodicPacketConfiguration(_configuration.get().period_message, 0);
 
     TaskBase::stopHook();
 }
