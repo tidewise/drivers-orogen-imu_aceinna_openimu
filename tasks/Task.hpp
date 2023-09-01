@@ -44,6 +44,10 @@ namespace imu_aceinna_openimu {
             base::Time sample_time);
         aggregator::TimestampEstimator* mTimestampEstimator = nullptr;
 
+        int m_angular_velocity_filter_position = 0;
+        std::vector<base::Vector3d> m_angular_velocity_filter_buffer;
+        Eigen::Vector3d filterAngularVelocity(Eigen::Vector3d const& v);
+
     public:
         /** TaskContext constructor for Task
          * \param name Name of the task. This name needs to be unique to make it
