@@ -38,10 +38,27 @@ bool Task::configureHook()
     driver->validateDevice();
 
     TaskConfiguration conf = _configuration.get();
+    auto configurationOld = driver->readConfiguration();
     driver->writeAccelerationLowPassFilter(conf.acceleration_low_pass_filter);
     driver->writeAngularVelocityLowPassFilter(conf.angular_velocity_low_pass_filter);
     driver->writeGPSProtocol(conf.gps_protocol);
     driver->writeGPSBaudrate(conf.gps_baudrate);
+    MagneticCalibration calibration = _magnetic_calibration.get();
+    driver->writeMagneticCalibration(calibration);
+
+    auto configurationNew = driver->readConfiguration();
+    if (configurationNew.needsReset(configurationOld)) {
+        driver->saveConfiguration();
+        driver->reset();
+
+        auto configurationFinal = driver->readConfiguration();
+        if (configurationFinal != configurationNew) {
+            throw std::runtime_error(
+                "reset IMU to apply new configuration, but the "
+                "configurations do not match"
+            );
+        }
+    }
 
     delete mTimestampEstimator;
     mTimestampEstimator = new aggregator::TimestampEstimator(base::Time::fromSeconds(10),
