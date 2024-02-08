@@ -2,6 +2,8 @@
 
 name "imu_aceinna_openimu"
 
+cxx_standard "c++17"
+
 import_types_from "std"
 import_types_from "base"
 import_types_from "iodrivers_base"
@@ -14,6 +16,7 @@ import_types_from "imu_aceinna_openimuTypes.hpp"
 import_types_from "imu_aceinna_openimu/Configuration.hpp"
 import_types_from "imu_aceinna_openimu/FilterState.hpp"
 import_types_from "imu_aceinna_openimu/MagneticInfo.hpp"
+import_types_from "imu_aceinna_openimu/MagneticCalibration.hpp"
 import_types_from "imu_aceinna_openimu/Status.hpp"
 
 task_context "Task", subclasses: "iodrivers_base::Task" do
@@ -22,6 +25,7 @@ task_context "Task", subclasses: "iodrivers_base::Task" do
     property "local_time_synchronized_with_gps", "bool", false
     property "timestamp_estimator_status_period", "base/Time"
     property "configuration", "imu_aceinna_openimu/TaskConfiguration"
+    property "magnetic_calibration", "imu_aceinna_openimu/MagneticCalibration"
 
     # Message rate (in Hz)
     #
