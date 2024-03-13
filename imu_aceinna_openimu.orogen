@@ -27,6 +27,12 @@ task_context "Task", subclasses: "iodrivers_base::Task" do
     property "configuration", "imu_aceinna_openimu/TaskConfiguration"
     property "magnetic_calibration", "imu_aceinna_openimu/MagneticCalibration"
 
+    # Name of the target frame
+    property "world_frame", "std/string"
+
+    # Name of the source frame
+    property "imu_frame", "std/string"
+
     # Message rate (in Hz)
     #
     # Allowed values are 200, 100, 50, 25, 20, 10, 5, 2 and 1.
