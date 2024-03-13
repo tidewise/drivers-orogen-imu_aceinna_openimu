@@ -137,6 +137,8 @@ void Task::processIO()
         filtered_rbs.time = time;
         filtered_rbs.angular_velocity =
             filterAngularVelocity(update.rbs.angular_velocity);
+        filtered_rbs.sourceFrame = _imu_frame.get();
+        filtered_rbs.targetFrame = _world_frame.get();
         _pose_samples.write(filtered_rbs);
 
         if (!update.rba.time.isNull()) {
