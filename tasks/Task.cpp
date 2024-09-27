@@ -3,6 +3,7 @@
 #include "Task.hpp"
 #include <aggregator/TimestampEstimator.hpp>
 #include <imu_aceinna_openimu/Driver.hpp>
+#include <imu_aceinna_openimu/Parameter.hpp>
 #include <iodrivers_base/ConfigureGuard.hpp>
 
 using namespace imu_aceinna_openimu;
@@ -45,6 +46,10 @@ bool Task::configureHook()
     driver->writeGPSBaudrate(conf.gps_baudrate);
     MagneticCalibration calibration = _magnetic_calibration.get();
     driver->writeMagneticCalibration(calibration);
+
+    driver->writeConfiguration(RTK_HEADING_TO_MAG_HEADING,
+        conf.rtk_heading2mag_heading.getDeg(),
+        true);
 
     auto configurationNew = driver->readConfiguration();
     if (configurationNew.needsReset(configurationOld)) {
