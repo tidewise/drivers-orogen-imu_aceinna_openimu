@@ -16,6 +16,8 @@ namespace imu_aceinna_openimu {
 
         GPSProtocol gps_protocol = GPS_UBLOX;
         int32_t gps_baudrate = 115200;
+
+        base::Angle rtk_heading2mag_heading = base::Angle::unknown();
     };
 
 
