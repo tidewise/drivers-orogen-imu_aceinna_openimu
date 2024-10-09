@@ -44,6 +44,7 @@ bool Task::configureHook()
     driver->writeAngularVelocityLowPassFilter(conf.angular_velocity_low_pass_filter);
     driver->writeGPSProtocol(conf.gps_protocol);
     driver->writeGPSBaudrate(conf.gps_baudrate);
+    driver->writeLeverArm(conf.lever_arm);
     MagneticCalibration calibration = _magnetic_calibration.get();
     driver->writeMagneticCalibration(calibration);
     driver->writeRTKHeading2MagHeading(conf.rtk_heading2mag_heading);
