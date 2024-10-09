@@ -46,10 +46,7 @@ bool Task::configureHook()
     driver->writeGPSBaudrate(conf.gps_baudrate);
     MagneticCalibration calibration = _magnetic_calibration.get();
     driver->writeMagneticCalibration(calibration);
-
-    driver->writeConfiguration(RTK_HEADING_TO_MAG_HEADING,
-        conf.rtk_heading2mag_heading.getDeg(),
-        true);
+    driver->writeRTKHeading2MagHeading(conf.rtk_heading2mag_heading);
 
     auto configurationNew = driver->readConfiguration();
     if (configurationNew.needsReset(configurationOld)) {
