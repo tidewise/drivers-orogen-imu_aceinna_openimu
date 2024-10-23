@@ -48,6 +48,7 @@ bool Task::configureHook()
     MagneticCalibration calibration = _magnetic_calibration.get();
     driver->writeMagneticCalibration(calibration);
     driver->writeRTKHeading2MagHeading(conf.rtk_heading2mag_heading);
+    driver->writeOrientation(conf.orientation);
 
     auto configurationNew = driver->readConfiguration();
     if (configurationNew.needsReset(configurationOld)) {

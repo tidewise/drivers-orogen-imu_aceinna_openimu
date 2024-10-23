@@ -23,6 +23,14 @@ namespace imu_aceinna_openimu {
          * GNSS antenna position in IMU frame
          */
         base::Vector3d lever_arm = base::Vector3d::Zero();
+
+        /** Mapping between logical (output) orientation of the IMU and its
+         * physical axes
+         *
+         * +Y+Z+X uses the sensors on the +Y physical axis to represent the +X
+         * output axis
+         */
+        std::string orientation = "+X+Y+Z";
     };
 
 
