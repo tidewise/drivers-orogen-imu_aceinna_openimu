@@ -48,6 +48,12 @@ namespace imu_aceinna_openimu {
         std::vector<base::Vector3d> m_angular_velocity_filter_buffer;
         Eigen::Vector3d filterAngularVelocity(Eigen::Vector3d const& v);
 
+        Eigen::Quaterniond m_magnetic2nwu_rot;
+
+        /** Apply the configured static magnetic declination to get true north */
+        Eigen::Quaterniond magneticNorthToTrueNorth(
+            Eigen::Quaterniond const& imu2nwu_magnetic) const;
+
     public:
         /** TaskContext constructor for Task
          * \param name Name of the task. This name needs to be unique to make it

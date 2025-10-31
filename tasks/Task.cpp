@@ -11,6 +11,7 @@ using namespace imu_aceinna_openimu;
 Task::Task(std::string const& name)
     : TaskBase(name)
 {
+    _nwu2magnetic_angle.set(base::Angle::fromRad(0.0));
 }
 
 Task::~Task()
@@ -36,6 +37,9 @@ bool Task::configureHook()
     if (!TaskBase::configureHook())
         return false;
 
+    m_magnetic2nwu_rot =
+        Eigen::AngleAxisd(-_nwu2magnetic_angle.get().getRad(), Eigen::Vector3d::UnitZ());
+
     driver->validateDevice();
 
     TaskConfiguration conf = _configuration.get();
@@ -57,10 +61,8 @@ bool Task::configureHook()
 
         auto configurationFinal = driver->readConfiguration();
         if (configurationFinal != configurationNew) {
-            throw std::runtime_error(
-                "reset IMU to apply new configuration, but the "
-                "configurations do not match"
-            );
+            throw std::runtime_error("reset IMU to apply new configuration, but the "
+                                     "configurations do not match");
         }
     }
 
@@ -138,6 +140,9 @@ void Task::processIO()
             timeSync(update.filter_state.mode == OPMODE_INS, local_time, update.rbs.time);
 
         auto filtered_rbs = update.rbs;
+        if (!filtered_rbs.hasValidPosition()) {
+            filtered_rbs.orientation = magneticNorthToTrueNorth(update.rbs.orientation);
+        }
         filtered_rbs.time = time;
         filtered_rbs.angular_velocity =
             filterAngularVelocity(update.rbs.angular_velocity);
@@ -163,6 +168,13 @@ void Task::processIO()
         _timestamp_estimator_status.write(mTimestampEstimatorStatus);
     }
 }
+
+Eigen::Quaterniond Task::magneticNorthToTrueNorth(
+    Eigen::Quaterniond const& imu2nwu_magnetic_rot) const
+{
+    return m_magnetic2nwu_rot * imu2nwu_magnetic_rot;
+}
+
 Eigen::Vector3d Task::filterAngularVelocity(Eigen::Vector3d const& angular_velocity)
 {
     int filter_size = _angular_velocity_filter_size.get();

@@ -27,6 +27,18 @@ task_context "Task", subclasses: "iodrivers_base::Task" do
     property "configuration", "imu_aceinna_openimu/TaskConfiguration"
     property "magnetic_calibration", "imu_aceinna_openimu/MagneticCalibration"
 
+    # The magnetic declination, that is the bearing of the true north in the frame of
+    # the magnetic north
+    #
+    # The standard magnetic declination is magnetic2nwu, but with positive angles counted
+    # east. Our convention is positive west, so the property is defined as nwu2magnetic
+    # to be able to keep the value the same.
+    # See https://www.ncei.noaa.gov/products/magnetic-declination)
+    #
+    # This is applied only if the IMU is in AHRS mode. In INS mode, it will use an
+    # internal model to correct based on the global position
+    property "nwu2magnetic_angle", "base/Angle"
+
     # Name of the target frame
     property "world_frame", "std/string"
 
