@@ -195,7 +195,7 @@ Eigen::Vector3d Task::filterAngularVelocity(Eigen::Vector3d const& angular_veloc
         angular_velocity;
 
     Eigen::Vector3d sum = Eigen::Vector3d::Zero();
-    for (auto const v : m_angular_velocity_filter_buffer) {
+    for (auto const& v : m_angular_velocity_filter_buffer) {
         sum += v;
     }
     return sum / filter_size;
